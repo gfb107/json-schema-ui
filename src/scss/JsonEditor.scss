@@ -1,0 +1,227 @@
+$spacing: 14px;
+
+.json-editor {
+  * {
+    box-sizing: border-box;
+  }
+
+  button, input, textarea, select, table:not(.table) {
+    font-size: inherit;
+    outline: none;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .errors {
+    display: none;
+  }
+
+  .has-error {
+    > input, > textarea, > select {
+      border-color: #a94442;
+    }
+
+    > ul.errors {
+      color: #a94442;
+      padding: 0;
+      display: block;
+      list-style: none;
+      margin: 0;
+
+      > li::before {
+        content: '⚠';
+        font-size: 18px;
+        padding-right: 4px;
+      }
+    }
+  }
+
+  .glyphicon {
+    margin-left: 4px;
+    vertical-align: text-top;
+  }
+
+  input[type="number"] {
+    text-align: right;
+  }
+
+  [x-type="object"] {
+    > [role="property"] {
+      margin: 0 (-$spacing/2);
+
+      &:not(:first-child) {
+        margin-top: $spacing;
+      }
+
+      > * {
+        margin-left: $spacing/2;
+        margin-right: $spacing/2;
+      }
+
+      > .glyphicon {
+        margin: 0 0 0 4px;
+      }
+
+      > label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: inline-block;
+
+        &:not(.checkbox-inline) > input[type="checkbox"] {
+          margin: 0 5px 0 0;
+        }
+      }
+
+      > input {
+        display: block;
+      }
+
+      &.removed {
+        > :not(:first-child) {
+          display: none;
+        }
+      }
+
+      > [x-type="array"],
+      > [x-type="object"] {
+        margin-left: $spacing;
+      }
+    }
+
+    &[x-format="horizontal"] {
+      > [role="property"] {
+        &[x-type="boolean"],
+        &[x-type="integer"],
+        &[x-type="number"],
+        &[x-type="string"] {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: flex-start;
+
+          > label {
+            margin-top: 3px;
+          }
+
+          > .description {
+            margin-top: 3px;
+          }
+        }
+        > label {
+          white-space: nowrap;
+        }
+      }
+    }
+
+    &[x-format="grid"] {
+      display: grid;
+      grid-gap: $spacing;
+
+      >[role="property"] {
+        margin-top: 0;
+      }
+    }
+  }
+
+  [x-type="array"] {
+    &.multi-select-checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+
+      > label {
+        font-weight: normal;
+
+        > input[type="checkbox"] {
+          margin-right: 4px;
+        }
+      }
+    }
+  }
+
+  [description] {
+    position: relative;
+    font-family: 'Glyphicons Halflings';
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 4px;
+
+    &.clicked,
+    /* &:hover */ {
+      &::before {
+        content: attr(description);
+        font-family: Roboto;
+        font-weight: normal;
+        position: absolute;
+        right: -125px;
+        bottom: calc(100% + 6px);
+        // transform: translateX(-100%) translateY(-100%);
+        background: rgb(0,0,0);
+        text-align: center;
+        color: #fff;
+        padding: 4px;
+        font-size: 12px;
+        width: 250px;
+        border-radius: 5px;
+        pointer-events: none;
+      }
+      &::after {
+        content: "";
+        position: absolute;
+        top:-6px;
+        left:50%;
+        transform: translateX(-50%);
+        border-width: 4px 6px 0 6px;
+        border-style: solid;
+        border-color: rgb(0,0,0) transparent transparent transparent;
+        z-index: 100;
+      }
+    }
+  }
+
+  table:not(.table) {
+    border-collapse: collapse;
+
+    > thead > tr {
+      border-bottom: 1px solid #ddd;
+    }
+
+    > tbody > tr:nth-child(odd) {
+      background-color: #f9f9f9;
+    }
+
+    > thead > tr > th,
+    > tbody > tr > th,
+    > tbody > tr > td {
+      padding: 4px;
+      vertical-align: baseline;
+      text-align: left;
+    }
+
+    > thead > tr > th,
+    > tbody > tr > th {
+      &[x-type="number"], &[x-type="integer"] {
+        text-align: right;
+      }
+    }
+  }
+
+  table.table {
+    > tbody, > tfoot, > thead {
+      > tr {
+        > td, > th {
+          vertical-align: baseline;
+        }
+      }
+    }
+  }
+
+  .checkbox-inline + .checkbox-inline {
+    margin-left: 0;
+    margin-right: 10px;
+  }
+
+  td > div > input {
+    width: 100%;
+  }
+}
