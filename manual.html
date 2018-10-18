@@ -1,0 +1,157 @@
+<html language="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
+  <style type="text/css">
+    * {
+      font-family: Roboto;
+      font-size: 16px;
+    }
+
+    [x-type="object"]:not([x-format]) {
+      display: grid;
+      grid-template-columns: auto;
+    }
+
+    [role="property"] {
+      margin-top: 0 !important;
+      border: 1px solid black;
+
+      &:not(:first-child) {
+        border-top: none;
+      }
+    }
+
+    [role="property"] > label {
+      display: block;
+      width: max-content;
+      font-weight: normal;
+      position: relative;
+    }
+
+    [role="property"][x-type="string"] > label.has-error::after {
+      content: '✖';
+      position: absolute;
+      top: 0;
+      right: 5px;
+      color: #a94442;
+    }
+
+    [role="property"] > label > input[type="text"]  {
+      padding: 20px 0 5px 5px;
+      border: none;
+    }
+
+    [role="property"] > label > .title  {
+      font-size: 75%;
+      color: #999;
+      position: absolute;
+      left: 7px;
+      top: 5px;
+    }
+
+    [role="property"] > label > input[type="text"]:focus ~ .title  {
+      color: black;
+    }
+
+    [role="property"].optional > label > input[type="checkbox"] {
+      position: absolute;
+      top: 5px;
+      left: 7px;
+    }
+
+    [role="property"].optional > label > input[type="checkbox"] {
+      position: absolute;
+      top: 5px;
+      left: 7px;
+    }
+
+    [role="property"].optional > label > .title  {
+      left: 30px;
+    }
+  </style>
+  <script type="text/javascript" src="src/index.js"></script>
+</head>
+<body>
+    <h2>JSON Editor Test</h2>
+    <div id="target" class="json-editor">
+      <div role="container" x-type="object">
+        <ul class="errors"></ul>
+        <div role="property" x-type="object">
+          <label>Basic object</label>
+          <div class="description">Object with default formatting</div>
+          <div role="container" x-type="object">
+            <ul class="errors"></ul>
+            <div role="property" x-type="boolean">
+              <label>
+                <div class="title">Boolean field</div>
+                <input x-type="boolean" type="checkbox" checked="false">
+                <ul class="errors"></ul>
+                <div class="description">The description of the boolean field</div>
+              </label>
+            </div>
+            <div role="property" x-type="string">
+              <label class="has-error">
+                <input type="text" x-type="string" value="abc" minlength="5" maxlength="10">
+                <ul class="errors">
+                  <li>Value length must not exceed 10</li>
+                  <li>Value must match pattern</li>
+                </ul>
+                <div class="description">Enter a string with at least 5 characters, but no more than 10</div>
+                <div class="title">String input</div>
+              </label>
+            </div>
+            <div role="property" x-type="string" class="optional">
+              <label class="has-errors">
+                <input type="text" x-type="string" value="" pattern="^(\([0-9]{3}\))?[0-9]{3}-[0-9]{4}$" placeholder="(___)___-____">
+                <input type="checkbox" checked="true">
+                <div class="title">Optional string</div>
+                <div class="description">Optional String that must match the pattern '^(\([0-9]{3}\))?[0-9]{3}-[0-9]{4}$'</div>
+                <ul class="errors">
+                <li>Value doesn't match pattern</li>
+              </ul>
+            </label>
+          </div>
+        </div>
+        <div role="property" x-type="object" x-format="horizontal">
+          <label>Object with horizontal format</label>
+          <div class="description">Single line for each property (assuming adequate width), with alignment</div>
+          <div role="container" x-type="object" x-format="horizontal">
+            <ul class="errors"></ul>
+            <div role="property" x-type="boolean">
+              <label style="width: 7.5em;">Boolean field</label>
+              <div role="container" x-type="boolean">
+                <input x-type="boolean" type="checkbox" checked="false">
+                <ul class="errors"></ul>
+              </div>
+              <div class="description">The description of the boolean field</div>
+            </div>
+            <div role="property" x-type="string">
+              <label style="width: 7.5em;">String input</label>
+              <div role="container" x-type="string" class="has-error">
+                <input x-type="string" value="abdef ghijk" minlength="5" maxlength="10">
+                <ul class="errors">
+                  <li>Value length must not exceed 10</li>
+                </ul>
+              </div>
+              <div class="description">Enter a string with at least 5 characters, but no more than 10</div>
+            </div>
+            <div role="property" x-type="string" class="removed">
+              <label style="width: 7.5em;">
+                <input type="checkbox">
+                Optional string
+              </label>
+              <div role="container" x-type="string" class="">
+                <input x-type="string" value="" pattern="^(\([0-9]{3}\))?[0-9]{3}-[0-9]{4}$" placeholder="(___)___-____">
+                <ul class="errors"></ul>
+              </div>
+              <div class="description">Optional String that must match the pattern '^(\([0-9]{3}\))?[0-9]{3}-[0-9]{4}$'</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+<html>

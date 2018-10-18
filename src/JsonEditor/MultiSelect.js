@@ -1,56 +1,56 @@
-import JsonEditor from './JsonEditor';
-import JsonSchema from '../JsonSchema';
-import JsonHelper from '../JsonHelper';
+/* global document: false */
+
+import JsonEditor from './JsonEditor'
 
 export default class MultiSelect extends JsonEditor {
   constructor( parms ) {
-    super( parms );
+    super( parms )
 
-    const { value, schema, container, options } = this;
+    const { value, schema, container } = this
 
-    const holder = this.createContainer();
-    this.holder = holder;
+    const holder = this.createContainer()
+    this.holder = holder
 
-    const itemSchema = schema.items;
+    const itemSchema = schema.items
 
-    const choices = itemSchema.enum || itemSchema.oneOf;
+    const choices = itemSchema.enum || itemSchema.oneOf
 
-    const input = this.createElement( 'select' );
-    this.input = input;
-    holder.appendChild( input );
-    input.setAttribute( 'multiple', true );
+    const input = this.createElement( 'select' )
+    this.input = input
+    holder.appendChild( input )
+    input.setAttribute( 'multiple', true )
 
     for ( let choice of choices ) {
-      const option = document.createElement( 'option' );
-      input.appendChild( option );
-      option.setAttribute( 'value', choice.const || choice );
-      option.appendChild( document.createTextNode( choice.title || choice ));
+      const option = document.createElement( 'option' )
+      input.appendChild( option )
+      option.setAttribute( 'value', choice.const || choice )
+      option.appendChild( document.createTextNode( choice.title || choice ))
 
       if ( value.indexOf( choice.const || choice ) != -1 ) {
-        option.setAttribute( 'selected', true );
+        option.setAttribute( 'selected', true )
       }
 
-      input.addEventListener('change', e => this.handleSelect( e ));
+      input.addEventListener( 'change', e => this.handleSelect( e ))
     }
 
-    holder.appendChild( this.errorHolder );
+    holder.appendChild( this.errorHolder )
 
-    container.appendChild( holder );
+    container.appendChild( holder )
   }
 
   handleSelect( e ) {
-    const options = e.target.options;
+    const options = e.target.options
 
-    const value = [];
+    const value = []
     for ( let i = 0; i < options.length; ++i ) {
-      const option = options[ i ];
+      const option = options[ i ]
       if ( option.selected ) {
-        value.push( option.value );
+        value.push( option.value )
       }
     }
 
-    this.value = value;
+    this.value = value
 
-    this.fire( 'change' );
+    this.fire( 'change' )
   }
 }

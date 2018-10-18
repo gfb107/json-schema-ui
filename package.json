@@ -5,7 +5,8 @@
   "description": "A browser UI driven by json-schema",
   "scripts": {
     "build": "webpack --config ./webpack.config.js",
-    "start": "webpack-serve --config ./webpack.config.js"
+    "start": "webpack-serve --config ./webpack.config.js",
+    "test": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
   },
   "homepage": "https://github.com/gfb107/json-schema-ui#readme",
   "devDependencies": {
+    "ajv": "^6.5.3",
     "autoprefixer": "^8.5.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.4",
@@ -37,6 +39,8 @@
     "config": "^1.30.0",
     "css-loader": "^0.28.11",
     "cssnano": "^3.10.0",
+    "eslint": "^5.7.0",
+    "eslint-config-idiomatic": "^3.0.0",
     "html-webpack-plugin": "^3.2.0",
     "node-sass": "^4.9.0",
     "postcss-loader": "^2.1.5",

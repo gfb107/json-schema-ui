@@ -1,151 +1,177 @@
-import JsonEditor from './JsonEditor';
-import JsonSchema from '../JsonSchema';
-import JsonHelper from '../JsonHelper';
+/* global document: false */
+
+import JsonEditor from './JsonEditor'
+import JsonHelper from '../JsonHelper'
 
 export default class ObjectEditor extends JsonEditor {
   constructor( parms ) {
-    super( parms );
+    super( parms )
 
-    const { value, schema, container, path, options } = this;
+    const { value, schema, container, path, options } = this
 
-    const props = Object.keys( schema.properties );
+    const props = Object.keys( schema.properties )
 
-    this.children = {};
+    this.children = {}
 
-    this.required = {};
-
-    for ( let prop of schema.required || [] ) {
-      this.required[ prop ] = true;
-    }
-
-    const div = this.createContainer();
-    div.appendChild( this.errorHolder );
-
-    let titles = {};
-    let titleLength = 0;
+    const required = {}
     for ( let prop of props ) {
-      const propSchema = schema.properties[ prop ];
-      const title = propSchema.title || this.unCamelCase( prop );
-      if ( title.length > titleLength ) {
-        titleLength = title.length;
-      }
-      titles[ prop ] = title;
+      required[ prop ] = false
     }
 
-    const width = Math.floor( titleLength / 2 ) + 0.5 + 'em';
+    for ( let prop of ( schema.required || [])) {
+      required[ prop ] = true
+    }
 
-    this.checkboxes = {};
+    let titles = {}
+    let titleLength = 0
+    for ( let prop of props ) {
+      const propSchema = schema.properties[ prop ]
+      let title = propSchema.title || this.unCamelCase( prop )
+      if ( title.length > titleLength ) {
+        titleLength = title.length
+      }
+      titles[ prop ] = title
+    }
+
+    this.checkboxes = {}
     this.holders = {}
 
+    const format = schema.format || 'column'
+
+    const propertiesContainer = this.createElement( 'div' )
+    propertiesContainer.classList.add( 'jsu-properties' )
+    if ( format ) {
+      propertiesContainer.classList.add( `jsu-format-${format}` )
+    }
+
+    if ( format === 'grid' ) {
+      JsonHelper.isDefined( schema.columns, columns => propertiesContainer.style.gridTemplateColumns = columns )
+      JsonHelper.isDefined( schema.rows, rows => propertiesContainer.style.gridTemplateRows = rows )
+    }
+
     for ( let prop of props ) {
-      const holder = this.createElement( 'div' );
-      div.appendChild( holder );
-      this.holders[ prop ] = holder;
-      holder.setAttribute( 'role', 'property' );
+      const holder = this.createElement( 'div' )
+      propertiesContainer.appendChild( holder )
+      this.holders[ prop ] = holder
+      holder.classList.add( 'jsu-property' )
 
-      const propSchema = schema.properties[ prop ];
-      this.setSchemaAttributes( holder, propSchema );
+      const propSchema = schema.properties[ prop ]
+      this.setSchemaClasses( holder, propSchema )
 
-      const label = document.createElement( 'label' );
-      label.style.width = width;
+      if ( format === 'grid' ) {
+        JsonHelper.isDefined( propSchema.column, column => holder.style.gridColumn = column )
+        JsonHelper.isDefined( propSchema.row, row => holder.style.gridRow = row )
+      }
 
-      if ( !this.required[ prop ]) {
-        if ( options.theme ) {
-          options.theme.checkboxLabel( label );
-        }
-        const checkbox = document.createElement( 'input' );
-        checkbox.setAttribute( 'type', 'checkbox' );
-        label.appendChild( checkbox );
+      const label = document.createElement( 'label' )
+      const title = this.createElement( 'div', titles[ prop ])
+      title.classList.add( 'jsu-title' )
+
+      if ( required[ prop ] == false ) {
+        label.classList.add( 'jsu-optional' )
+        const checkbox = document.createElement( 'input' )
+        checkbox.setAttribute( 'type', 'checkbox' )
+        checkbox.classList.add( 'jsu-optional' )
+        label.appendChild( checkbox )
         if ( typeof value[ prop ] != 'undefined' ) {
-          checkbox.setAttribute( 'checked', true );
+          checkbox.setAttribute( 'checked', true )
         } else {
-          holder.classList.add( 'removed' );
+          holder.classList.add( 'removed' )
         }
 
         if ( options.readOnly ) {
-          checkbox.setAttribute( 'disabled', true );
+          checkbox.setAttribute( 'disabled', true )
         }
 
-        checkbox.addEventListener('change', e => this.handleCheckbox( prop, e ));
-        this.checkboxes[ prop ] = checkbox;
+        checkbox.addEventListener( 'change', e => this.handleCheckbox( prop, e ))
+        this.checkboxes[ prop ] = checkbox
+
+        title.classList.add( 'jsu-optional' )
       }
 
-      label.appendChild( document.createTextNode( titles[ prop ]));
-      holder.appendChild( label );
+      label.appendChild( title )
+      holder.appendChild( label )
 
-      let description = propSchema.description;
-      let icon;
-
+      let description = propSchema.description
       if ( description ) {
-        description = this.createElement( 'div', description );
-        description.classList.add( 'description' );
-        if ( options.theme ) {
-          options.theme.description( description );
-        }
-        if ( !this.isSimpleType( propSchema.type )) {
-          holder.appendChild( description );
-        }
+        description = this.createElement( 'div', description )
+        description.classList.add( 'jsu-description' )
+        holder.appendChild( description )
       }
 
-      const child = JsonHelper.editor({ value: value[ prop ], schema: propSchema, container: holder, path: `${path}.${prop}`, ...options });
-      if ( description && this.isSimpleType( propSchema.type )) {
-        holder.appendChild( description );
+      const child = JsonHelper.editor({ value: value[ prop ], schema: propSchema, container: this.isSimpleType( propSchema.type ) ? label : holder, path: `${path}.${prop}`, required: required[ prop ], ...options })
+      if ( this.isSimpleType( propSchema.type )) {
+        holder.appendChild( child.errorHolder )
       }
 
-      if ( options.theme ) {
-        options.theme.formGroup( holder );
+      if ( typeof value[ prop ] === 'undefined' && required[ prop ]) {
+        value[ prop ] = child.value
       }
-      this.children[ prop ] = child;
-      child.on( 'change', () => this.handleChange( prop ));
+
+      this.children[ prop ] = child
+      child.on( 'change', () => this.handleChange( prop ))
     }
 
-    container.appendChild( div );
+    container.appendChild( propertiesContainer )
   }
 
   handleCheckbox( prop, e ) {
-    if ( e.target.checked ) {
-      this.children[ prop ].setValue( undefined );
-      this.holders[ prop ].classList.remove( 'removed' );
+    const target = e.target
+    if ( target.checked ) {
+      target.closest( '.jsu-property' ).classList.remove( 'removed' )
+      this.value[ prop ] = this.children[ prop ].value
     } else {
-      this.holders[ prop ].classList.add( 'removed' );
-      this.value[ prop ] = this.children[ prop ].getValue();
+      target.closest( '.jsu-property' ).classList.add( 'removed' )
+      // this.children[ prop ].setValue( undefined );
+      delete this.value[ prop ]
     }
-    this.fire( 'change' );
+
+    this.fire( 'change' )
   }
 
   handleChange( prop ) {
-    this.value[ prop ] = this.children[ prop ].getValue();
+    if ( typeof this.value === 'undefined' ) {
+      this.value = {}
+    }
+    this.value[ prop ] = this.children[ prop ].getValue()
 
-    this.fire( 'change' );
+    this.fire( 'change' )
+  }
+
+  setValue( value ) {
+    if ( typeof value === 'undefined' ) {
+      value = {}
+    }
+    this.value = value
+    for ( let prop of Object.keys( this.schema.properties )) {
+      this.children[ prop ].setValue( value[ prop ])
+    }
   }
 
   showErrors( errors ) {
-    errors = errors || [];
-    const path = this.path;
-    const pathLength = path.length;
+    errors = errors || []
+    const path = this.path
+    const pathLength = path.length
     let myErrors = []
-    let childErrors = {};
+    let childErrors = {}
     for ( let error of errors ) {
       if ( error.path === path ) {
         myErrors.push( error )
       } else if ( error.path.lastIndexOf( path, 0 ) != -1 ) {
-        let prop = error.path.substring( pathLength + 1 );
-        let dot = prop.indexOf( '.' );
+        let prop = error.path.substring( pathLength + 1 )
+        let dot = prop.indexOf( '.' )
         if ( dot != -1 ) {
-          prop = prop.substring( 0, dot );
+          prop = prop.substring( 0, dot )
         }
-        if ( !childErrors[ prop ] ) {
-          childErrors[ prop ] = [];
+        if ( !childErrors[ prop ]) {
+          childErrors[ prop ] = []
         }
-        childErrors[ prop ].push( error );
+        childErrors[ prop ].push( error )
       }
     }
-    super.showErrors( myErrors );
-    for ( let prop of Object.keys( childErrors )) {
-      let child = this.children[ prop ];
-      if ( child ) {
-        child.showErrors( childErrors[ prop ]);
-      }
+    super.showErrors( myErrors )
+    for ( let prop of Object.keys( this.children )) {
+      this.children[ prop ].showErrors( childErrors[ prop ])
     }
   }
 }

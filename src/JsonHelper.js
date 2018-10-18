@@ -1,87 +1,129 @@
-import JsonSchema from './JsonSchema';
-import ArrayEditor from './JsonEditor/ArrayEditor';
-import IntegerEditor from './JsonEditor/IntegerEditor';
-import NumberEditor from './JsonEditor/NumberEditor';
-import MultiSelectCheckboxes from './JsonEditor/MultiSelectCheckboxes';
-import MultiSelect from './JsonEditor/MultiSelect';
-import ObjectEditor from './JsonEditor/ObjectEditor';
-import ObjectTableEditor from './JsonEditor/ObjectTableEditor';
-// import ObjectGridEditor from './ObjectGridEditor';
-import StringEditor from './JsonEditor/StringEditor';
-import Validator from './Validator';
+/* global Element:false, document: false */
 
-import Bootstrap3 from './Themes/Bootstrap3';
+import JsonSchema from './JsonSchema'
+import ArrayEditor from './JsonEditor/ArrayEditor'
+import BooleanEditor from './JsonEditor/BooleanEditor'
+import IntegerEditor from './JsonEditor/IntegerEditor'
+import NumberEditor from './JsonEditor/NumberEditor'
+import MultiSelectCheckboxes from './JsonEditor/MultiSelectCheckboxes'
+import SelectEditor from './JsonEditor/SelectEditor'
+import MultiSelect from './JsonEditor/MultiSelect'
+import ObjectEditor from './JsonEditor/ObjectEditor'
+import ObjectTableEditor from './JsonEditor/ObjectTableEditor'
+// import ObjectGridEditor from './ObjectGridEditor';
+import StringEditor from './JsonEditor/StringEditor'
+import Validator from './Validator'
 
 const JsonHelper = {
   schema: obj => new JsonSchema( obj ),
 
   editor: parms => {
-    let { value, schema, container } = parms;
+    let { value, schema, container } = parms
 
     if ( !( schema instanceof JsonSchema )) {
       if ( typeof schema !== 'object' ) {
-        throw 'A schema must be provided';
+        throw 'A schema must be provided'
       }
-      schema = new JsonSchema( schema );
-    }
-
-    if ( typeof value === 'undefined' && typeof schema.default === 'undefined' ) {
-      throw 'A value must be provided, or the schema must have a default value';
+      schema = new JsonSchema( schema )
+      parms.schema = schema
     }
 
     if ( typeof container === 'string' ) {
-      container = document.getElementById( container );
+      container = document.getElementById( container )
     }
 
-    if ( !container instanceof Element ) {
-      throw 'A container must be provided';
+    if ( !( container instanceof Element )) {
+      throw 'A container must be provided'
     }
 
-    const type = schema.type;
-    const format = schema.format;
-    switch ( type ) {
-      case 'array': {
-        const items = schema.items;
-        if ( Array.isArray( items )) {
-          throw 'Tuples not yet supported';
-        } else {
-          if ( schema.uniqueItems === true && ( !!items.enum || !!items.oneOf )) {
-            if ( format === 'select' ) {
-              return new MultiSelect( parms );
-            } else {
-              return new MultiSelectCheckboxes( parms );
-            }
-          }
-          return new ArrayEditor( parms );
+    const type = schema.type
+    if ( typeof value === 'undefined' ) {
+      if ( typeof schema.default !== 'undefined' ) {
+        parms.value = schema.default
+      } else {
+        const defaults = {
+          array: [],
+          boolean: false,
+          integer: 0,
+          number: 0.0,
+          object: {},
+          string: ''
         }
+        parms.value = defaults[ type ]
       }
-      case 'integer':
-        return new IntegerEditor( parms );
-      case 'number':
-        return new NumberEditor( parms );
-      case 'string':
-        return new StringEditor( parms );
-      case 'object':
-        switch( schema.format ) {
-          case 'table': return new ObjectTableEditor( parms );
-          // case 'grid': return new ObjectGridEditor( parms );
-          default: return new ObjectEditor( parms );
+    }
+
+    const format = schema.format
+    let editor
+    switch ( type ) {
+    case 'array': {
+      const items = schema.items
+      if ( Array.isArray( items )) {
+        throw 'Tuples not yet supported'
+      } else {
+        if ( schema.uniqueItems === true && ( !!items.enum || !!items.oneOf )) {
+          if ( format === 'select' ) {
+            editor = new MultiSelect( parms )
+          } else {
+            editor = new MultiSelectCheckboxes( parms )
+          }
         }
-      default:
-        throw `Unsupported schema type ${type}`;
+        editor = new ArrayEditor( parms )
+      }
+      break
     }
+    case 'boolean':
+      editor = new BooleanEditor( parms )
+      break
+    case 'integer':
+      if ( schema.oneOf || schema.enum ) {
+        editor = new SelectEditor( parms )
+      } else {
+        editor = new IntegerEditor( parms )
+      }
+      break
+    case 'number':
+      if ( schema.oneOf || schema.enum ) {
+        editor = new SelectEditor( parms )
+      } else {
+        editor = new NumberEditor( parms )
+      }
+      break
+    case 'string':
+      if ( schema.oneOf || schema.enum ) {
+        editor = new SelectEditor( parms )
+      } else {
+        editor = new StringEditor( parms )
+      }
+      break
+    case 'object':
+      switch ( schema.format ) {
+      case 'table':
+        editor = new ObjectTableEditor( parms )
+        break
+        // case 'grid': return new ObjectGridEditor( parms );
+      default:
+        editor = new ObjectEditor( parms )
+      }
+      break
+    default:
+      throw `Unsupported schema type ${type}`
+    }
+    editor.validate()
+    return editor
   },
 
-  theme: name => {
-    switch( name ) {
-      case 'bootstrap3':
-        return new Bootstrap3();
-      default:
-        throw `Unknown theme ${name}`
-    }
-  },
+  validate: ( value, schema ) => Validator.validate( value, schema ),
 
-  validate: ( value, schema ) => Validator.validate( value, schema )
+  isDefined: ( value, callback ) => {
+    if ( typeof value !== 'undefined' ) {
+      if ( callback ) {
+        callback( value )
+      }
+      return true
+    }
+    return false
+  }
 }
 
-export default Object.freeze( JsonHelper );
+export default Object.freeze( JsonHelper )

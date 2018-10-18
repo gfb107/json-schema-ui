@@ -1,5 +1,5 @@
-import './scss/JsonEditor.scss';
+import './scss/JsonEditor.scss'
 
-import JsonHelper from './JsonHelper';
+import JsonHelper from './JsonHelper'
 
-export default JsonHelper;
+export default JsonHelper

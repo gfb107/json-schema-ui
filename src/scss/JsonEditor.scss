@@ -1,227 +1,213 @@
-$spacing: 14px;
+$primary-color: hsl(0,0%,13%);
+$secondary-color: hsl(0,0%,29%);
+$ancillary-color: hsl(0,0%,45%);
 
-.json-editor {
+$normal-weight: 400;
+$heavy-weight: 700;
+
+
+$active-color: #1976d2;
+$hover-color: #999;
+$error-color: #a94442;
+$spacing: 1rem;
+$gutter: 1.5rem;
+
+.jsu-main {
+  font-weight: $normal-weight;
+  color: $primary-color;
+
   * {
     box-sizing: border-box;
+    font-size: 1rem;
   }
 
-  button, input, textarea, select, table:not(.table) {
-    font-size: inherit;
-    outline: none;
+  input:not([type="checkbox"]),
+  textarea,
+  select {
+    // display: block;
+    // font-weight: bold;
+    // transition: border-color 0.25s ease-in-out;
+    box-shadow: inset 0 2px 4px 0 hsla(0, 0%, 0%, 0.08 );
   }
+}
 
-  .hidden {
-    display: none;
+.jsu-property {
+  position: relative;
+}
+
+.jsu-type-array {
+
+}
+
+.jsu-type-boolean {
+
+}
+
+.jsu-type-integer {
+
+}
+
+.jsu-type-number {
+
+}
+
+.jsu-properties {
+  width: fit-content;
+}
+
+.jsu-properties.jsu-format-column {
+  display: flex;
+  flex-flow: column wrap;
+  align-items: stretch;
+
+  > .jsu-property {
+    margin-top: $gutter;
   }
+}
 
-  .errors {
-    display: none;
+.jsu-properties.jsu-format-row {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: flex-start;
+  margin: 0 (-$gutter/2);
+
+  > .jsu-property {
+    margin: $gutter $gutter/2 0;
   }
+}
 
-  .has-error {
-    > input, > textarea, > select {
-      border-color: #a94442;
-    }
+.jsu-properties.jsu-format-grid {
+  display: grid;
+  grid-gap: $gutter;
+  margin-top: $gutter;
+  grid-template-columns: auto;
+  grid-template-rows: auto;
+}
 
-    > ul.errors {
-      color: #a94442;
-      padding: 0;
-      display: block;
-      list-style: none;
-      margin: 0;
+.jsu-type-string {
+}
 
-      > li::before {
-        content: '⚠';
-        font-size: 18px;
-        padding-right: 4px;
-      }
-    }
-  }
+input.jsu-type-string,
+input.jsu-type-integer,
+input.jsu-type-number,
+select.jsu-type-string {
+  // outline: none;
+  margin-top: 9px;
+  display: inline-block;
+  width: 100%;
+}
 
-  .glyphicon {
-    margin-left: 4px;
-    vertical-align: text-top;
-  }
+input.jsu-type-integer,
+input.jsu-type-number {
+  text-align: right;
+}
 
-  input[type="number"] {
-    text-align: right;
-  }
+.jsu-header {
 
-  [x-type="object"] {
-    > [role="property"] {
-      margin: 0 (-$spacing/2);
+}
 
-      &:not(:first-child) {
-        margin-top: $spacing;
-      }
+.jsu-title {
+  font-weight: bold;
+  font-size: 1rem;
 
-      > * {
-        margin-left: $spacing/2;
-        margin-right: $spacing/2;
-      }
-
-      > .glyphicon {
-        margin: 0 0 0 4px;
-      }
-
-      > label {
-        font-weight: bold;
-        margin-bottom: 5px;
-        display: inline-block;
-
-        &:not(.checkbox-inline) > input[type="checkbox"] {
-          margin: 0 5px 0 0;
-        }
-      }
-
-      > input {
-        display: block;
-      }
-
-      &.removed {
-        > :not(:first-child) {
-          display: none;
-        }
-      }
-
-      > [x-type="array"],
-      > [x-type="object"] {
-        margin-left: $spacing;
-      }
-    }
-
-    &[x-format="horizontal"] {
-      > [role="property"] {
-        &[x-type="boolean"],
-        &[x-type="integer"],
-        &[x-type="number"],
-        &[x-type="string"] {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: flex-start;
-
-          > label {
-            margin-top: 3px;
-          }
-
-          > .description {
-            margin-top: 3px;
-          }
-        }
-        > label {
-          white-space: nowrap;
-        }
-      }
-    }
-
-    &[x-format="grid"] {
-      display: grid;
-      grid-gap: $spacing;
-
-      >[role="property"] {
-        margin-top: 0;
-      }
-    }
-  }
-
-  [x-type="array"] {
-    &.multi-select-checkboxes {
-      display: flex;
-      flex-wrap: wrap;
-
-      > label {
-        font-weight: normal;
-
-        > input[type="checkbox"] {
-          margin-right: 4px;
-        }
-      }
-    }
-  }
-
-  [description] {
-    position: relative;
-    font-family: 'Glyphicons Halflings';
-    display: inline-block;
+  &.jsu-optional {
     vertical-align: middle;
-    margin-left: 4px;
+    margin-left: 1.2rem;
 
-    &.clicked,
-    /* &:hover */ {
-      &::before {
-        content: attr(description);
-        font-family: Roboto;
-        font-weight: normal;
-        position: absolute;
-        right: -125px;
-        bottom: calc(100% + 6px);
-        // transform: translateX(-100%) translateY(-100%);
-        background: rgb(0,0,0);
-        text-align: center;
-        color: #fff;
-        padding: 4px;
-        font-size: 12px;
-        width: 250px;
-        border-radius: 5px;
-        pointer-events: none;
-      }
-      &::after {
-        content: "";
-        position: absolute;
-        top:-6px;
-        left:50%;
-        transform: translateX(-50%);
-        border-width: 4px 6px 0 6px;
-        border-style: solid;
-        border-color: rgb(0,0,0) transparent transparent transparent;
-        z-index: 100;
-      }
+    &::after {
+      content: " (optional)";
+      color: $ancillary-color;
+      font-size: 80%;
     }
   }
+}
 
-  table:not(.table) {
-    border-collapse: collapse;
+input[type="checkbox"].jsu-optional {
+  margin: 0;
+  vertical-align: top;
+  position: absolute;
+}
 
-    > thead > tr {
-      border-bottom: 1px solid #ddd;
-    }
+.jsu-feedback {
+  position: relative;
+  font-size: 1rem;
+}
 
-    > tbody > tr:nth-child(odd) {
-      background-color: #f9f9f9;
-    }
-
-    > thead > tr > th,
-    > tbody > tr > th,
-    > tbody > tr > td {
-      padding: 4px;
-      vertical-align: baseline;
-      text-align: left;
-    }
-
-    > thead > tr > th,
-    > tbody > tr > th {
-      &[x-type="number"], &[x-type="integer"] {
-        text-align: right;
-      }
-    }
+.jsu-feedback.has-error {
+  &::before {
+    content: '✖';
+    position: absolute;
+    color: $error-color;
+    top: 0;
+    left: -1rem;
   }
 
-  table.table {
-    > tbody, > tfoot, > thead {
-      > tr {
-        > td, > th {
-          vertical-align: baseline;
-        }
-      }
+  &.jsu-type-integer,
+  &.jsu-type-number {
+    &::before {
+      top: 12px;
+      left: 6px;
     }
   }
+}
 
-  .checkbox-inline + .checkbox-inline {
-    margin-left: 0;
-    margin-right: 10px;
+select.has-error ~ .jsu-feedback.has-error::before {
+  left: -1.7rem;
+}
+
+.jsu-errors {
+  display: none;
+  position: absolute;
+  color: $error-color;
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  font-size: 0.75rem;
+  background-color: #ddd;
+  z-index: 1;
+  margin-top: 1px;
+  border: 1px solid $error-color;
+//  top: 0;
+  padding: 4px;
+
+  &.has-error {
+    > *::before {
+      content: '✖';
+      padding-right: 4px;
+      white-space: nowrap;
+    }
   }
+}
 
-  td > div > input {
-    width: 100%;
+.jsu-active > .jsu-errors.has-error {
+  display: block;
+}
+
+.jsu-description {
+  color: $ancillary-color;
+  font-size: 0.8rem;
+  white-space: normal;
+  margin-top: 2px;
+}
+
+input, textarea, select {
+  &.has-error {
+    border-color: $error-color;
+
+    &::after {
+      content: '✖';
+      color: $error-color;
+      right: 0;
+      top: 0;
+      position: absolute;
+    }
+  }
+}
+
+.jsu-main {
+  .removed {
+    :not(.jsu-optional) {
+      display: none;
+    }
   }
 }

@@ -1,15 +1,15 @@
-import NumberEditor from './NumberEditor';
+import NumberEditor from './NumberEditor'
 
 export default class IntegerEditor extends NumberEditor {
   constructor( parms ) {
-    super( parms );
+    super( parms )
 
-    const { value, schema, container } = parms;
+    const { schema } = parms
 
-    this.setAttribute( this.input, 'step', schema.multipleOf || 1 );
+    this.setAttribute( this.input, 'step', schema.multipleOf || 1 )
   }
 
   getValue() {
-    return Number.parseInt( this.input.value );
+    return Number.parseInt( this.input.value )
   }
 }

@@ -1,147 +1,200 @@
-import JsonHelper from '../JsonHelper';
-import JsonSchema from '../JsonSchema';
+/* global document:false, Node:false */
+
+import JsonHelper from '../JsonHelper'
 
 export default class JsonEditor {
   constructor( parms ) {
-    let { value, schema, container, path, ...options } = parms;
-    this.value = value;
-    this.schema = schema;
-    this.container = container;
-    this.path = path || '$';
-    this.options = options;
+    let { value, schema, container, path, ...options } = parms
+    this.value = value
+    this.schema = schema
+    this.container = container
+    this.path = path || '$'
+    this.options = options
     if ( schema.readOnly ) {
-      options.readOnly = true;
+      options.readOnly = true
     }
 
-    this.errorHolder = document.createElement( 'ul' );
-    this.errorHolder.classList.add( 'errors' );
+    this.errorHolder = document.createElement( 'ul' )
+    this.errorHolder.classList.add( 'jsu-errors' )
 
-    this.listeners = {};
+    // just in case the sub-class doesn't do this
+    container.appendChild( this.errorHolder )
+
+    this.listeners = {}
 
     if ( !schema.root ) {
-      container.classList.add( 'json-editor' );
-      this.on( 'change', () => this.handleRootChange());
+      container.classList.add( 'jsu-main' )
+      this.on( 'change', () => this.handleRootChange())
     }
   }
 
   on( event, func ) {
-    let listeners = this.listeners[ event ];
-    if ( ! Array.isArray( listeners )) {
-      listeners = [];
-      this.listeners[ event ] = listeners;
+    let listeners = this.listeners[ event ]
+    if ( !Array.isArray( listeners )) {
+      listeners = []
+      this.listeners[ event ] = listeners
     }
-    listeners.push( func );
+    listeners.push( func )
   }
 
   off( event, func ) {
-    const listeners = this.listeners[ event ];
+    const listeners = this.listeners[ event ]
     if ( Array.isArray( listeners )) {
-      const index = listeners.indexOf( func );
+      const index = listeners.indexOf( func )
       if ( index !== -1 ) {
-        listeners.splice( index, 1 );
+        listeners.splice( index, 1 )
       }
     }
   }
 
   fire( event, data ) {
-    const listeners = this.listeners[ event ];
+    const listeners = this.listeners[ event ]
     if ( Array.isArray( listeners )) {
       for ( let listener of listeners ) {
-        listener( this, data );
+        listener( this, data )
       }
     }
   }
 
-  setSchemaAttributes( element, schema ) {
+  setSchemaClasses( element, schema ) {
     if ( typeof schema === 'undefined' ) {
-      schema = this.schema;
+      schema = this.schema
     }
-    element.setAttribute( 'x-type', schema.type );
-    const format = schema.format;
+    element.classList.add( `jsu-type-${schema.type}` )
+    const format = schema.format
     if ( format ) {
-      element.setAttribute( 'x-format', format );
+      element.classList.add( `jsu-format-${format}` )
     }
   }
 
   createElement( tag, child ) {
-    const el = document.createElement( tag );
+    const el = document.createElement( tag )
     if ( typeof child === 'string' ) {
-      child = document.createTextNode( child );
+      child = document.createTextNode( child )
     }
     if ( child instanceof Node ) {
-      el.appendChild( child );
+      el.appendChild( child )
     }
-    return el;
+
+    if ([ 'input', 'select', 'textarea' ].indexOf( tag ) != -1 ) {
+      el.addEventListener( 'focus', e => this.handleFocus( e ))
+      el.addEventListener( 'blur', e => this.handleBlur( e ))
+    }
+    return el
+  }
+
+  handleFocus( e ) {
+    const container = e.target.closest( '.jsu-property' )
+    if ( container ) {
+      container.classList.add( 'jsu-active' )
+    }
+  }
+
+  handleBlur( e ) {
+    const container = e.target.closest( '.jsu-property' )
+    const text = e.target.value
+    if ( text.length > 0 ) {
+      const pattern = this.schema.pattern
+      const mask = this.schema.mask
+      if ( pattern && mask ) {
+        const re = new RegExp( pattern )
+        if ( re.test( text )) {
+          const temp = text.replace( re, mask )
+          if ( temp !== text && temp.match( re )) {
+            this.value = temp
+            e.target.value = temp
+            this.handleInput()
+          }
+        }
+      }
+    }
+    if ( container ) {
+      container.classList.remove( 'jsu-active' )
+    }
   }
 
   createContainer( tag ) {
-    const container = this.createElement( tag || 'div' );
-    container.setAttribute( 'role', 'container' );
-    this.setSchemaAttributes( container );
-    return container;
+    const container = this.createElement( tag || 'div' )
+    container.setAttribute( 'role', 'container' )
+    this.setSchemaClasses( container )
+    return container
   }
 
   setAttribute( element, name, value ) {
     if ( typeof value !== 'undefined' ) {
-      element.setAttribute( name, value );
-      return true;
+      element.setAttribute( name, value )
+      return true
     }
-    return false;
+    return false
   }
 
   setValue( value ) {
-    this.value = value;
+    this.value = value
+    JsonHelper.isDefined( this.input, input => {
+      input.value = typeof value === 'undefined' ? null : value
+    })
   }
 
   getValue() {
-    return this.value;
+    return this.value
   }
 
   isUpperCase( c ) {
-    return !!c && c != c.toLocaleLowerCase();
+    return !!c && c != c.toLocaleLowerCase()
   }
 
   unCamelCase( text ) {
-    text = text.trim();
+    text = text.trim()
     let result = ''
-    let first = true;
-    let c;
+    let first = true
+    let c
 
     for ( let i = 0; i < text.length; ++i ) {
-      c = text.charAt( i );
+      c = text.charAt( i )
       if ( first ) {
         c = c.toUpperCase()
-        first = false;
+        first = false
       } else if ( this.isUpperCase( c )) {
-        result += ' ';
+        result += ' '
       }
-      result += c;
+      result += c
     }
-    return result;
+    return result
   }
 
   isSimpleType( type ) {
-    return [ 'boolean', 'integer', 'number', 'string' ].indexOf( type ) != -1;
+    return [ 'boolean', 'integer', 'number', 'string' ].indexOf( type ) != -1
   }
 
   showErrors( errors ) {
-    const errorHolder = this.errorHolder;
+    errors = errors || []
+    const hasError = errors.length > 0
+    const { errorHolder, input, feedback } = this
+    // this.container.classList.toggle( 'has-error', hasError );
     if ( errorHolder ) {
-      errorHolder.innerHTML = '';
-      if ( !errors || errors.length === 0 ) {
-        errorHolder.parentElement.classList.remove( 'has-error' );
-      } else {
-        errorHolder.parentElement.classList.add( 'has-error' );
-        for ( let error of errors ) {
-          errorHolder.appendChild( this.createElement( 'li', error.error ));
-        }
+      errorHolder.innerHTML = ''
+      errorHolder.classList.toggle( 'has-error', hasError )
+      for ( let error of errors ) {
+        errorHolder.appendChild( this.createElement( 'li', error.error ))
       }
+    }
+
+    if ( input ) {
+      input.classList.toggle( 'has-error', hasError )
+    }
+
+    if ( feedback ) {
+      feedback.classList.toggle( 'has-error', hasError )
     }
   }
 
   handleRootChange() {
-    this.errors = JsonHelper.validate( this.value, this.schema );
-    this.valid = this.errors.length == 0;
-    this.showErrors( this.errors );
+    this.validate()
+  }
+
+  validate() {
+    this.errors = JsonHelper.validate({ value: this.value, schema: this.schema, options: this.options })
+    this.valid = this.errors.length == 0
+    this.showErrors( this.errors )
   }
 }
