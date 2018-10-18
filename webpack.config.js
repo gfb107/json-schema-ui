@@ -10,14 +10,6 @@ let plugins = [
   new HTMLWebpackPlugin({
     template: path.resolve( __dirname, 'index.html' )
   }),
-  new HTMLWebpackPlugin({
-    filename: 'bootstrap3.html',
-    template: path.resolve( __dirname, 'bootstrap3.html' )
-  }),
-  new HTMLWebpackPlugin({
-    filename: 'manual.html',
-    template: path.resolve( __dirname, 'manual.html' )
-  })
 ]
 
 if ( config.get( 'uglify' )) {
