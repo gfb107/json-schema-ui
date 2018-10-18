@@ -1,5 +1,3 @@
-/* global document: false */
-
 import JsonEditor from './JsonEditor'
 
 export default class MultiSelect extends JsonEditor {

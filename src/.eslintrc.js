@@ -9,5 +9,10 @@ module.exports = {
   },
   "rules": {
     "one-var": "off"
+  },
+  "globals": {
+    "document": false,
+    "Element": false,
+    "Node": false
   }
 };

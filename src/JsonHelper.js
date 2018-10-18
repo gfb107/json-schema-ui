@@ -1,5 +1,3 @@
-/* global Element:false, document: false */
-
 import JsonSchema from './JsonSchema'
 import ArrayEditor from './JsonEditor/ArrayEditor'
 import BooleanEditor from './JsonEditor/BooleanEditor'

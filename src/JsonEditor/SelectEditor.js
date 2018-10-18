@@ -1,4 +1,3 @@
-/* global document:false */
 import JsonEditor from './JsonEditor'
 
 export default class SelectEditor extends JsonEditor {

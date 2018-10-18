@@ -1,5 +1,3 @@
-/* global document:false, Node:false */
-
 import JsonHelper from '../JsonHelper'
 
 export default class JsonEditor {

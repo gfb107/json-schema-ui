@@ -1,5 +1,3 @@
-/* global document: false */
-
 import JsonEditor from './JsonEditor'
 import JsonHelper from '../JsonHelper'
 
